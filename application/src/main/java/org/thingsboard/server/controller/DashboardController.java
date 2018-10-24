@@ -15,11 +15,25 @@
  */
 package org.thingsboard.server.controller;
 
+import lombok.Getter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-import org.thingsboard.server.common.data.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+import org.thingsboard.server.common.data.Customer;
+import org.thingsboard.server.common.data.Dashboard;
+import org.thingsboard.server.common.data.DashboardInfo;
+import org.thingsboard.server.common.data.EntityType;
+import org.thingsboard.server.common.data.ShortCustomerInfo;
 import org.thingsboard.server.common.data.audit.ActionType;
+import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.CustomerId;
 import org.thingsboard.server.common.data.id.DashboardId;
 import org.thingsboard.server.common.data.id.TenantId;
@@ -27,9 +41,6 @@ import org.thingsboard.server.common.data.page.TextPageData;
 import org.thingsboard.server.common.data.page.TextPageLink;
 import org.thingsboard.server.common.data.page.TimePageData;
 import org.thingsboard.server.common.data.page.TimePageLink;
-import org.thingsboard.server.dao.exception.IncorrectParameterException;
-import org.thingsboard.server.dao.model.ModelConstants;
-import org.thingsboard.server.exception.ThingsboardException;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -40,11 +51,23 @@ public class DashboardController extends BaseController {
 
     public static final String DASHBOARD_ID = "dashboardId";
 
+    @Value("${dashboard.max_datapoints_limit}")
+    @Getter
+    private long maxDatapointsLimit;
+
+
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
     @RequestMapping(value = "/dashboard/serverTime", method = RequestMethod.GET)
     @ResponseBody
     public long getServerTime() throws ThingsboardException {
         return System.currentTimeMillis();
+    }
+
+    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
+    @RequestMapping(value = "/dashboard/maxDatapointsLimit", method = RequestMethod.GET)
+    @ResponseBody
+    public long getMaxDatapointsLimit() throws ThingsboardException {
+        return maxDatapointsLimit;
     }
 
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")

@@ -111,8 +111,15 @@ function ManageWidgetActionsController($rootScope, $scope, $document, $mdDialog,
         }
     });
 
-    function enterFilterMode () {
+    function enterFilterMode (event) {
+        let $button = angular.element(event.currentTarget);
+        let $toolbarsContainer = $button.closest('.toolbarsContainer');
+
         vm.query.search = '';
+
+        $timeout(()=>{
+            $toolbarsContainer.find('.searchInput').focus();
+        })
     }
 
     function exitFilterMode () {
@@ -237,13 +244,18 @@ function ManageWidgetActionsController($rootScope, $scope, $document, $mdDialog,
             vm.widgetActions[actionSourceId] = targetActions;
         }
         if (prevActionId) {
-            var index = getActionIndex(prevActionId, vm.allActions);
-            if (index > -1) {
-                vm.allActions[index] = action;
+            const indexInTarget = getActionIndex(prevActionId, targetActions);
+            const indexInAllActions = getActionIndex(prevActionId, vm.allActions);
+            if (indexInTarget > -1) {
+                targetActions[indexInTarget] = widgetAction;
+            } else if (indexInAllActions > -1) {
+                const prevActionSourceId = vm.allActions[indexInAllActions].actionSourceId;
+                const index = getActionIndex(prevActionId,vm.widgetActions[prevActionSourceId]);
+                vm.widgetActions[prevActionSourceId].splice(index,1);
+                targetActions.push(widgetAction);
             }
-            index = getActionIndex(prevActionId, targetActions);
-            if (index > -1) {
-                targetActions[index] = widgetAction;
+            if (indexInAllActions > -1) {
+                vm.allActions[indexInAllActions] = action;
             }
         } else {
             vm.allActions.push(action);
